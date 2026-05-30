@@ -21,7 +21,34 @@ Unlike generic Electron or Python-based desktop apps, **LightConda** is a compil
 
 ---
 
-## 🛠️ Build and Compile
+## 🚀 Tech Specs & Requirements
+
+- **Processor**: Apple Silicon (M1/M2/M3/M4) or Intel Core.
+- **Operating System**: macOS 14.0 (Sonoma) or newer.
+- **Core Engine**: Swift 6, SwiftUI, AppKit integration.
+- **Binary Footprint**: `< 2MB` (zipped).
+- **Dependencies**: Conda CLI installed locally (will scan automatically).
+
+---
+
+## 📥 Download the Application
+
+You can download the pre-compiled, double-clickable version of **LightConda** directly without having to build it from the source code.
+
+👉 **[Download the Latest Release of LightConda](https://github.com/mursalatul/lightconda/releases/latest)**
+
+Once downloaded:
+1. Extract the `LightConda.zip` file.
+2. Drag `LightConda.app` to your `Applications` folder.
+3. Double-click to open and enjoy!
+
+---
+
+## 🏗️ Wanna Build Yourself?
+
+If you are a developer or want to compile the application yourself from the raw Swift source files, follow the instructions below.
+
+### Build and Compile
 
 Because the codebase is written purely in Swift without complex third-party frameworks, you can compile and package the application directly from your terminal using only the standard **Xcode Command Line Tools** (no full Xcode installation required!).
 
@@ -40,14 +67,13 @@ Because the codebase is written purely in Swift without complex third-party fram
 5. Generates the standard properties property list (`Info.plist`).
 6. Packages the final bundle into a distributable archive (`LightConda.zip`) for quick sharing.
 
-Double-click **`LightConda.app`** to launch the graphical user interface!
-
 ---
 
-## 📂 Project Structure
+### 📂 Project Structure
 
 ```
 lightconda/
+├── .github/               # GitHub Actions CI configurations (Release & build automations)
 ├── .gitignore             # Standard git exclusions (ignores builds, zips, cache)
 ├── AppIcon.png            # Glowing 1024x1024 glassmorphism app icon asset
 ├── README.md              # Detailed documentation
@@ -63,13 +89,3 @@ lightconda/
     ├── PackageDetailsSheet.swift  # Scrollable package details sheet with table sorts
     └── SettingsView.swift     # Custom paths, diagnostics, and file browsers
 ```
-
----
-
-## 🚀 Tech Specs & Requirements
-
-- **Processor**: Apple Silicon (M1/M2/M3/M4) or Intel Core.
-- **Operating System**: macOS 14.0 (Sonoma) or newer.
-- **Core Engine**: Swift 6, SwiftUI, AppKit integration.
-- **Binary Footprint**: `< 2MB` (zipped).
-- **Dependencies**: Conda CLI installed locally (will scan automatically).
