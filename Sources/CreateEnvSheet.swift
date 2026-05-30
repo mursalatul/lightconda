@@ -6,7 +6,6 @@ struct CreateEnvSheet: View {
     @ObservedObject var state: AppState
     
     @State private var envName = ""
-    @State private var useCustomLocation = false
     @State private var customLocationPath = ""
     @State private var pythonVersion = "3.12"
     @State private var preinstallPackages = [
@@ -26,15 +25,7 @@ struct CreateEnvSheet: View {
     let pythonVersions = ["3.12", "3.11", "3.10", "3.9", "3.8"]
     
     var isValid: Bool {
-        if useCustomLocation {
-            return !customLocationPath.isEmpty
-        } else {
-            let trimmed = envName.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.isEmpty { return false }
-            // Verify only alphanumeric, dashes, and underscores
-            let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
-            return trimmed.unicodeScalars.allSatisfy { allowedCharacters.contains($0) }
-        }
+        return !customLocationPath.isEmpty
     }
     
     var body: some View {
@@ -62,58 +53,27 @@ struct CreateEnvSheet: View {
                 // Wizard Input Fields
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        // Location Type Picker
+                        // Custom Path Selector
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("INSTALLATION LOCATION")
+                            Text("TARGET FOLDER")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(.secondary)
                             
-                            Picker("Location", selection: $useCustomLocation) {
-                                Text("Default Conda Directory").tag(false)
-                                Text("Custom Folder (Prefix)").tag(true)
-                            }
-                            .pickerStyle(.segmented)
-                            .labelsHidden()
-                        }
-                        
-                        if useCustomLocation {
-                            // Custom Path Selector
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("TARGET FOLDER")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.secondary)
-                                
-                                HStack(spacing: 8) {
-                                    TextField("Click Browse to select folder", text: $customLocationPath)
-                                        .textFieldStyle(.roundedBorder)
-                                        .controlSize(.large)
-                                        .disabled(true)
-                                    
-                                    Button("Browse...") {
-                                        browseForLocation()
-                                    }
-                                    .controlSize(.large)
-                                }
-                                
-                                Text("The environment will be created inside this exact folder.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        } else {
-                            // Environment Name
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("ENVIRONMENT NAME")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.secondary)
-                                
-                                TextField("e.g. machine-learning-env", text: $envName)
+                            HStack(spacing: 8) {
+                                TextField("Click Browse to select folder", text: $customLocationPath)
                                     .textFieldStyle(.roundedBorder)
                                     .controlSize(.large)
+                                    .disabled(true)
                                 
-                                Text("Use alphanumeric characters, dashes (-) or underscores (_) only.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                Button("Browse...") {
+                                    browseForLocation()
+                                }
+                                .controlSize(.large)
                             }
+                            
+                            Text("The Conda environment will be created directly in this selected folder.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
                         
                         // Python Version
@@ -260,10 +220,7 @@ struct CreateEnvSheet: View {
         isCreating = true
         errorMessage = nil
         
-        let targetDescriptor = useCustomLocation ? customLocationPath : envName
-        let locationFlag = useCustomLocation ? "-p" : "-n"
-        
-        consoleLogs = "$ conda create -y \(locationFlag) \"\(targetDescriptor)\" python=\(pythonVersion)"
+        consoleLogs = "$ conda create -y -p \"\(customLocationPath)\" python=\(pythonVersion)"
         
         var packagesToInstall = ["python=\(pythonVersion)"]
         for pkg in preinstallPackages {
@@ -274,7 +231,7 @@ struct CreateEnvSheet: View {
         }
         consoleLogs += "\n\n"
         
-        let args = ["create", "-y", locationFlag, targetDescriptor] + packagesToInstall
+        let args = ["create", "-y", "-p", customLocationPath] + packagesToInstall
         
         do {
             let status = try await CondaManager.shared.runCommandLive(arguments: args) { output in
