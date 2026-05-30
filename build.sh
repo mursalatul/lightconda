@@ -37,7 +37,7 @@ fi
 # 5. Compile Swift sources with SwiftUI support
 echo "Compiling Swift source code files..."
 swiftc \
-    -sdk /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk \
+    -sdk $(xcrun --show-sdk-path) \
     -target arm64-apple-macos14.0 \
     -O \
     -parse-as-library \
