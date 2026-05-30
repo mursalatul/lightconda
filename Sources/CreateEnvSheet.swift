@@ -1,10 +1,13 @@
 import SwiftUI
+import AppKit
 
 struct CreateEnvSheet: View {
     @Binding var isPresented: Bool
     @ObservedObject var state: AppState
     
     @State private var envName = ""
+    @State private var useCustomLocation = false
+    @State private var customLocationPath = ""
     @State private var pythonVersion = "3.12"
     @State private var preinstallPackages = [
         ("numpy", false),
@@ -23,11 +26,15 @@ struct CreateEnvSheet: View {
     let pythonVersions = ["3.12", "3.11", "3.10", "3.9", "3.8"]
     
     var isValid: Bool {
-        let trimmed = envName.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty { return false }
-        // Verify only alphanumeric, dashes, and underscores
-        let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
-        return trimmed.unicodeScalars.allSatisfy { allowedCharacters.contains($0) }
+        if useCustomLocation {
+            return !customLocationPath.isEmpty
+        } else {
+            let trimmed = envName.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty { return false }
+            // Verify only alphanumeric, dashes, and underscores
+            let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
+            return trimmed.unicodeScalars.allSatisfy { allowedCharacters.contains($0) }
+        }
     }
     
     var body: some View {
@@ -55,19 +62,58 @@ struct CreateEnvSheet: View {
                 // Wizard Input Fields
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        // Environment Name
+                        // Location Type Picker
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("ENVIRONMENT NAME")
+                            Text("INSTALLATION LOCATION")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(.secondary)
                             
-                            TextField("e.g. machine-learning-env", text: $envName)
-                                .textFieldStyle(.roundedBorder)
-                                .controlSize(.large)
-                            
-                            Text("Use alphanumeric characters, dashes (-) or underscores (_) only.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            Picker("Location", selection: $useCustomLocation) {
+                                Text("Default Conda Directory").tag(false)
+                                Text("Custom Folder (Prefix)").tag(true)
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
+                        }
+                        
+                        if useCustomLocation {
+                            // Custom Path Selector
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("TARGET FOLDER")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.secondary)
+                                
+                                HStack(spacing: 8) {
+                                    TextField("Click Browse to select folder", text: $customLocationPath)
+                                        .textFieldStyle(.roundedBorder)
+                                        .controlSize(.large)
+                                        .disabled(true)
+                                    
+                                    Button("Browse...") {
+                                        browseForLocation()
+                                    }
+                                    .controlSize(.large)
+                                }
+                                
+                                Text("The environment will be created inside this exact folder.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        } else {
+                            // Environment Name
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("ENVIRONMENT NAME")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.secondary)
+                                
+                                TextField("e.g. machine-learning-env", text: $envName)
+                                    .textFieldStyle(.roundedBorder)
+                                    .controlSize(.large)
+                                
+                                Text("Use alphanumeric characters, dashes (-) or underscores (_) only.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         
                         // Python Version
@@ -213,7 +259,11 @@ struct CreateEnvSheet: View {
     private func startCreation() async {
         isCreating = true
         errorMessage = nil
-        consoleLogs = "$ conda create -y -n \(envName) python=\(pythonVersion)"
+        
+        let targetDescriptor = useCustomLocation ? customLocationPath : envName
+        let locationFlag = useCustomLocation ? "-p" : "-n"
+        
+        consoleLogs = "$ conda create -y \(locationFlag) \"\(targetDescriptor)\" python=\(pythonVersion)"
         
         var packagesToInstall = ["python=\(pythonVersion)"]
         for pkg in preinstallPackages {
@@ -224,7 +274,7 @@ struct CreateEnvSheet: View {
         }
         consoleLogs += "\n\n"
         
-        let args = ["create", "-y", "-n", envName] + packagesToInstall
+        let args = ["create", "-y", locationFlag, targetDescriptor] + packagesToInstall
         
         do {
             let status = try await CondaManager.shared.runCommandLive(arguments: args) { output in
@@ -254,6 +304,20 @@ struct CreateEnvSheet: View {
                 creationSuccessful = false
                 consoleLogs += "\n\n$ Execution Error: \(error.localizedDescription)"
             }
+        }
+    }
+    
+    private func browseForLocation() {
+        let panel = NSOpenPanel()
+        panel.title = "Select Environment Directory"
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        
+        if panel.runModal() == .OK, let url = panel.url {
+            customLocationPath = url.path
+            envName = url.lastPathComponent
         }
     }
 }
