@@ -1,0 +1,32 @@
+# macOS System files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon & Assets Cache
+Icon\r
+.DocumentRevisions-V100
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.fseventsd
+
+# Compiled application packages
+*.app/
+*.zip
+*.dmg
+*.iconset/
+*.icns
+app_icon_raw.png
+
+# Build artifacts
+build/
+.build/
+*.o
+*.o.json
+*.d
+*.swiftdoc
+*.swiftmodule
+*.swiftsourceinfo
+*~
+*.log
