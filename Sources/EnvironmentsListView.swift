@@ -244,11 +244,12 @@ struct EnvironmentCard: View {
                 Button(action: onDelete) {
                     Image(systemName: "trash.fill")
                         .font(.system(size: 11))
-                        .foregroundColor(.red)
+                        .foregroundColor(env.name == "base" ? .secondary.opacity(0.5) : .red)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
-                .help("Delete Environment")
+                .disabled(env.name == "base")
+                .help(env.name == "base" ? "Base environment cannot be deleted" : "Delete Environment")
             }
         }
         .padding(16)
