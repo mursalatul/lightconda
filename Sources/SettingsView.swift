@@ -58,7 +58,31 @@ struct SettingsView: View {
                         .stroke(Color.primary.opacity(0.08), lineWidth: 1)
                 )
                 
-                // Section 3: Diagnostics Panel
+                // Section 3: Package Filter Preference
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("PACKAGE FILTER PREFERENCE")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.secondary)
+                    
+                    Picker("", selection: $state.showPythonPackagesOnly) {
+                        Text("Python Packages Only").tag(true)
+                        Text("All Conda Packages").tag(false)
+                    }
+                    .pickerStyle(.radioGroup)
+                    
+                    Text("Choose which packages to show by default when viewing environment details. 'Python Packages Only' filters out low-level system binaries (like ncurses, openssl, zlib) to show only libraries you typically import in Python.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(20)
+                .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                )
+                
+                // Section 4: Diagnostics Panel
                 VStack(alignment: .leading, spacing: 16) {
                     Text("DIAGNOSTICS & SYSTEM INFO")
                         .font(.system(size: 10, weight: .bold))

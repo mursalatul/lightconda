@@ -54,6 +54,17 @@ struct CondaPackage: Identifiable, Codable, Hashable {
         self.buildString = buildString
         self.channel = channel
     }
+    
+    var isPythonPackage: Bool {
+        let bs = buildString.lowercased()
+        if bs.hasPrefix("py") || bs.contains("py") {
+            return true
+        }
+        if channel.lowercased() == "pypi" {
+            return true
+        }
+        return false
+    }
 }
 
 struct DynamicCodingKeys: CodingKey {

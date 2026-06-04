@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PackageDetailsSheet: View {
     let env: CondaEnv
+    @ObservedObject var state: AppState
     @Environment(\.dismiss) var dismiss
     
     @State private var packages: [CondaPackage] = []
@@ -10,12 +11,16 @@ struct PackageDetailsSheet: View {
     @State private var errorMessage: String? = nil
     @State private var sortOrder = [KeyPathComparator(\CondaPackage.name)]
     
+    var basePackages: [CondaPackage] {
+        state.showPythonPackagesOnly ? packages.filter { $0.isPythonPackage } : packages
+    }
+    
     var filteredPackages: [CondaPackage] {
         let list: [CondaPackage]
         if searchText.isEmpty {
-            list = packages
+            list = basePackages
         } else {
-            list = packages.filter { pkg in
+            list = basePackages.filter { pkg in
                 pkg.name.localizedCaseInsensitiveContains(searchText) ||
                 pkg.version.localizedCaseInsensitiveContains(searchText) ||
                 pkg.channel.localizedCaseInsensitiveContains(searchText)
@@ -74,7 +79,7 @@ struct PackageDetailsSheet: View {
                 
                 Spacer()
                 
-                Text("\(filteredPackages.count) of \(packages.count) packages")
+                Text("\(filteredPackages.count) of \(basePackages.count) packages")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

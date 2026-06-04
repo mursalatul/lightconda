@@ -7,6 +7,11 @@ class AppState: ObservableObject {
     @Published var condaExecutablePath: String = ""
     @Published var errorMessage: String? = nil
     @Published var hasConda: Bool = true
+    @Published var showPythonPackagesOnly: Bool = (UserDefaults.standard.object(forKey: "showPythonPackagesOnly") as? Bool) ?? true {
+        didSet {
+            UserDefaults.standard.set(showPythonPackagesOnly, forKey: "showPythonPackagesOnly")
+        }
+    }
     
     init() {
         Task {

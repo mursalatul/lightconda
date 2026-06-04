@@ -114,7 +114,7 @@ struct EnvironmentsListView: View {
             }
         }
         .sheet(item: $selectedEnvForPackages) { env in
-            PackageDetailsSheet(env: env)
+            PackageDetailsSheet(env: env, state: state)
         }
         .sheet(isPresented: $showCreateSheet) {
             CreateEnvSheet(isPresented: $showCreateSheet, state: state)
