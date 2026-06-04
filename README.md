@@ -29,6 +29,63 @@ Unlike generic Electron or Python-based desktop apps, **LightConda** is a compil
 - **Binary Footprint**: `< 2MB` (zipped).
 - **Dependencies**: Conda CLI installed locally (will scan automatically).
 
+---
+
+## 📦 Installing and Configuring Conda (via Miniconda)
+
+If you do not have Conda installed, you can quickly install and configure it on your Mac:
+
+### 1. Download and Install Miniconda
+* **Download the installer**: Downloads the official Miniconda installer script optimized for Apple Silicon (arm64) macOS:
+  ```bash
+  curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
+  ```
+* **Execute the installation**: Launches the installer. Follow the terminal prompts to complete the installation setup:
+  ```bash
+  bash ./Miniconda3-latest-MacOSX-arm64.sh
+  ```
+
+### 2. Recommended Post-Installation Setup
+* **Disable auto-activation of the base environment**: Prevents Conda from automatically activating the `base` environment every time you open a new terminal window:
+  ```bash
+  conda config --set auto_activate_base false
+  ```
+* **Locate the base Conda directory**: Prints the root directory path of your Conda installation:
+  ```bash
+  conda info --base
+  ```
+* **Prevent accidental base alterations**: Restricts write permissions on the base directory configuration folder so you don't accidentally modify core/base system packages (*replace `/path/to/miniconda3` with the path returned by the command above*):
+  ```bash
+  chmod -R a-w /path/to/miniconda3/conda-meta
+  ```
+
+> [!TIP]
+> ### 🔄 How to Update Conda in the Future (Unlocking the Base)
+> Because we locked down the `conda-meta` directory in the step above, you will need to temporarily lift the lock if you ever want to update your core Conda installation:
+> ```bash
+> # 1. Unlock write permissions
+> chmod -R u+w /path/to/miniconda3/conda-meta
+> 
+> # 2. Run the update command
+> conda update -n base conda
+> 
+> # 3. Re-lock the directory to keep it safe
+> chmod -R a-w /path/to/miniconda3/conda-meta
+> ```
+
+---
+
+## 🔒 Why is there no pre-compiled `.app` download?
+
+To ensure security and compatibility without a paid Apple Developer subscription, LightConda is compiled locally from source:
+
+* **Gatekeeper Restrictions**: Any pre-compiled `.app` or `.zip` downloaded from the internet is automatically flagged by macOS with a **quarantine attribute**. Since independent builds lack an official Apple Developer code signature, Gatekeeper will block and terminate the application.
+* **Local Compilation Context**: When you build the app yourself locally via standard CLI tools, macOS has context from the compilation process. Because the executable is generated directly on your machine, it is allowed to launch instantly without any security overrides.
+
+So build and run on your pc. It will work like a charm ;)
+
+---
+
 ## 🏗️ How to Build and Run
 
 To use **LightConda**, you compile the application yourself from the native Swift source files. Because the codebase is written purely in Swift without complex third-party frameworks, you can compile and package the application directly from your terminal using only the standard **Xcode Command Line Tools** (no full Xcode installation required!).
